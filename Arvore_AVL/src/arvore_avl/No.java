@@ -1,13 +1,15 @@
 package arvore_avl;
 
-public class No {
-	int valor;
+public class No<T> {
+	T data;
     int altura;
-    No esquerda;
-    No direita;
+    No<T> left;
+    No<T> right;
 
-    public No(int valor) {
-        this.valor = valor;
+    public No(T valor) {
+        this.data = valor;
         this.altura = 1;
+        this.left = null;
+        this.right = null;
     }
 }

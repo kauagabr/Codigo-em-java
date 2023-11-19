@@ -1,10 +1,10 @@
 package arvore_avl;
 
-public class ArvoreAVL {
-	No raiz;
+public class ArvoreAVL<T extends Comparable<T>> {
+	No<T> raiz;
 
 	// Calcula a altura de um nó
-	int altura(No no) {
+	private int altura(No<T> no) {
 		if (no == null) {
 			return 0;
 		}
@@ -12,28 +12,28 @@ public class ArvoreAVL {
 	}
 
 	// Calcula o fator de balanceamento de um nó
-	int fatorBalanceamento(No no) {
+	private int fatorBalanceamento(No<T> no) {
 		if (no == null) {
 			return 0;
 		}
-		return altura(no.esquerda) - altura(no.direita);
+		return altura(no.left) - altura(no.right);
 	}
 
 	// Atualiza a altura de um nó
-	void atualizaAltura(No no) {
+	private void atualizaAltura(No<T> no) {
 		if (no != null) {
-			no.altura = 1 + Math.max(altura(no.esquerda), altura(no.direita));
+			no.altura = 1 + Math.max(altura(no.left), altura(no.right));
 		}
 	}
 
 	// Realiza uma rotação à direita em torno do nó y
-	No rotacaoDireita(No y) {
-		No x = y.esquerda;
-		No T2 = x.direita;
+	private No<T> rotacaoDireita(No<T> y) {
+		No<T> x = y.left;
+		No<T> T2 = x.right;
 
 		// Realiza a rotação
-		x.direita = y;
-		y.esquerda = T2;
+		x.right = y;
+		y.left = T2;
 
 		// Atualiza alturas
 		atualizaAltura(y);
@@ -44,13 +44,13 @@ public class ArvoreAVL {
 	}
 
 	// Realiza uma rotação à esquerda em torno do nó x
-	No rotacaoEsquerda(No x) {
-		No y = x.direita;
-		No T2 = y.esquerda;
+	private No<T> rotacaoEsquerda(No<T> x) {
+		No<T> y = x.right;
+		No<T> T2 = y.left;
 
 		// Realiza a rotação
-		y.esquerda = x;
-		x.direita = T2;
+		y.left = x;
+		x.right = T2;
 
 		// Atualiza alturas
 		atualizaAltura(x);
@@ -61,20 +61,20 @@ public class ArvoreAVL {
 	}
 
 	// Insere um valor na árvore AVL
-	No inserir(No no, int valor) {
+	private No<T> inserir(No<T> no, T valor) {
 		// Passo 1: Inserção normal de uma árvore binária de pesquisa
 		if (no == null) {
-			return new No(valor);
+			return new No<>(valor);
 		}
 
-		if (valor < no.valor) {
-			no.esquerda = inserir(no.esquerda, valor);
-		} else if (valor > no.valor) {
-			no.direita = inserir(no.direita, valor);
-		} else {
-			// Duplicatas não são permitidas
-			return no;
-		}
+		if (valor.compareTo(no.data) < 0) {
+            no.left = inserir(no.left, valor);
+        } else if (valor.compareTo(no.data) > 0) {
+            no.right = inserir(no.right, valor);
+        } else {
+            // Duplicatas não são permitidas
+            return no;
+        }
 
 		// Passo 2: Atualiza a altura do nó atual
 		atualizaAltura(no);
@@ -85,48 +85,61 @@ public class ArvoreAVL {
 		// Passo 4: Verifica os casos de desequilíbrio e realiza as rotações necessárias
 
 		// Caso Esquerda-Esquerda
-		if (balanceamento > 1 && valor < no.esquerda.valor) {
-			return rotacaoDireita(no);
-		}
+        if (balanceamento > 1 && valor.compareTo(no.left.data) < 0) {
+            return rotacaoDireita(no);
+        }
 
-		// Caso Direita-Direita
-		if (balanceamento < -1 && valor > no.direita.valor) {
-			return rotacaoEsquerda(no);
-		}
+        // Caso Direita-Direita
+        if (balanceamento < -1 && valor.compareTo(no.right.data) > 0) {
+            return rotacaoEsquerda(no);
+        }
 
-		// Caso Esquerda-Direita
-		if (balanceamento > 1 && valor > no.esquerda.valor) {
-			no.esquerda = rotacaoEsquerda(no.esquerda);
-			return rotacaoDireita(no);
-		}
+        // Caso Esquerda-Direita
+        if (balanceamento > 1 && valor.compareTo(no.left.data) > 0) {
+            no.left = rotacaoEsquerda(no.left);
+            return rotacaoDireita(no);
+        }
 
-		// Caso Direita-Esquerda
-		if (balanceamento < -1 && valor < no.direita.valor) {
-			no.direita = rotacaoDireita(no.direita);
-			return rotacaoEsquerda(no);
-		}
+        // Caso Direita-Esquerda
+        if (balanceamento < -1 && valor.compareTo(no.right.data) < 0) {
+            no.right = rotacaoDireita(no.right);
+            return rotacaoEsquerda(no);
+        }
 
 		// Se o nó não estiver desequilibrado, apenas retorna o nó (sem alterações)
 		return no;
 	}
+	
+	// Realiza um percurso em ordem na árvore AVL
+		private void percursoEmOrdem(No<T> no) {
+			if (no != null) {
+				percursoEmOrdem(no.left);
+				System.out.print(no.data + " ");
+				percursoEmOrdem(no.right);
+			}
+		}
 
 	// Método auxiliar para inserir um valor na árvore
-	void inserir(int valor) {
+	public void inserir(T valor) {
 		raiz = inserir(raiz, valor);
 	}
 
-	// Realiza um percurso em ordem na árvore AVL
-	void percursoEmOrdem(No no) {
-		if (no != null) {
-			percursoEmOrdem(no.esquerda);
-			System.out.print(no.valor + " ");
-			percursoEmOrdem(no.direita);
-		}
-	}
-
 	// Método auxiliar para realizar um percurso em ordem
-	void percursoEmOrdem() {
+	public void percursoEmOrdem() {
 		percursoEmOrdem(raiz);
 	}
+	
+	public static void main(String[] args) {
+        ArvoreAVL<Integer> arvore = new ArvoreAVL<Integer>();
 
+        arvore.inserir(10);
+        arvore.inserir(20);
+        arvore.inserir(30);
+        arvore.inserir(40);
+        arvore.inserir(50);
+        arvore.inserir(25);
+
+        System.out.println("Percurso em Ordem da Árvore AVL:");
+        arvore.percursoEmOrdem();
+    }
 }
